@@ -1,0 +1,47 @@
+# This file defines all the services that make up your application.
+version: '3.8'
+
+services:
+  # 1. The PostgreSQL Database Service
+  database:
+    image: postgres:13 # Use the official PostgreSQL version 13 image
+    container_name: delivery_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: your_db_password # Use a strong password here
+      POSTGRES_DB: delivery_app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # This persists your database data
+    ports:
+      - "5432:5432" # Maps your computer's port to the container's port
+
+  # 2. The Node.js Backend Service
+  server:
+    container_name: delivery_server
+    build:
+      context: ./server # Tells Docker Compose to build the image from the ./server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      # This URL points to the 'database' service defined above
+      DATABASE_URL: postgresql://postgres:your_db_password@database:5432/delivery_app
+      JWT_SECRET: your_super_secret_jwt_key # Use a strong JWT secret
+    depends_on:
+      - database # Tells this service to wait until the database service is running
+
+  # 3. The React Frontend Service
+  client:
+    container_name: delivery_client
+    build:
+      context: ./client # Builds from the ./client/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # This points to the backend running inside the Docker network
+      REACT_APP_API_URL: http://localhost:3001
+    depends_on:
+      - server # Wait for the server to be ready
+
+# Define the volume for persisting database data
+volumes:
+  postgres_data:

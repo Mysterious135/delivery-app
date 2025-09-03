@@ -1,0 +1,10 @@
+### Create a new order
+POST http://localhost:3001/api/orders
+Content-Type: application/json
+
+{
+    "items": [
+        { "itemId": 1, "quantity": 1 },
+        { "itemId": 5, "quantity": 2 }
+    ]
+}
